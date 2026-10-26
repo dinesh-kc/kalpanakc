@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>कल्पनाको आकाश ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Mukta:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b091a;
+            --bg2: #241432;
+            --moon: #fff3db;
+            --rose: #f4a261;
+            --lav: #b185db;
+            --dim: #d8cbe5;
+            --candle-warmth: rgba(255, 170, 70, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 30%, var(--bg2), var(--bg) 85%) fixed;
+            color: var(--moon);
+            font: 18px/1.8 'Mukta', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Candle Glow Particles Background Canvas */
+        canvas#sky {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        canvas#fx {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .serif {
+            font-family: 'Tiro Devanagari Hindi', 'Mukta', serif;
+            font-weight: 400;
+        }
+
+        section {
+            position: relative;
+            z-index: 1;
+        }
+
+        .screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px 20px;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 8vw, 4.5rem);
+            line-height: 1.35;
+        }
+
+        p.sub {
+            color: var(--dim);
+            max-width: 36ch;
+            margin: 14px auto;
+        }
+
+        /* Countdown */
+        .cd {
+            display: flex;
+            gap: 16px;
+            margin: 28px 0;
+        }
+
+        .cd div {
+            min-width: 76px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(244, 162, 97, 0.15);
+        }
+
+        .cd b {
+            display: block;
+            font: 400 2.6rem 'Tiro Devanagari Hindi', serif;
+            color: var(--rose);
+        }
+
+        .cd span {
+            font-size: .85rem;
+            color: var(--dim);
+        }
+
+        button.go {
+            background: var(--moon);
+            color: #1a0f2e;
+            border: 0;
+            border-radius: 40px;
+            padding: 14px 36px;
+            font: 600 1.1rem 'Mukta', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 0 35px rgba(244, 162, 97, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        button.go:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 45px rgba(244, 162, 97, 0.8);
+        }
+
+        #story {
+            display: none;
+        }
+
+        /* Timeline */
+        .tl {
+            position: relative;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .tl::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(var(--lav), var(--rose));
+            opacity: .5;
+            transform: translateX(-1px);
+        }
+
+        .m {
+            position: relative;
+            display: flex;
+            width: 50%;
+            padding: 0 34px 70px 0;
+            justify-content: flex-end;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: 1s ease;
+        }
+
+        .m.in {
+            opacity: 1;
+            transform: none;
+        }
+
+        .m:nth-child(even) {
+            margin-left: 50%;
+            padding: 0 0 70px 34px;
+            justify-content: flex-start;
+        }
+
+        .m::after {
+            content: "";
+            position: absolute;
+            right: -7px;
+            top: 18px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--moon);
+            box-shadow: 0 0 0 5px rgba(244, 162, 97, 0.3), 0 0 24px 6px var(--rose);
+        }
+
+        .m:nth-child(even)::after {
+            right: auto;
+            left: -7px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 330px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-6px) rotate(-0.5deg);
+            box-shadow: 0 10px 30px rgba(244, 162, 97, 0.25);
+        }
+
+        .card .ph {
+            aspect-ratio: 4/5;
+            background: #23183a;
+            position: relative;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card .tx {
+            padding: 16px 18px 20px;
+            text-align: left;
+        }
+
+        .card small {
+            color: var(--rose);
+            font-weight: 600;
+        }
+
+        .card h3 {
+            font-size: 1.4rem;
+            line-height: 1.4;
+            margin: 2px 0 6px;
+            font-weight: 400;
+        }
+
+        .card p {
+            font-size: .95rem;
+            color: var(--dim);
+            line-height: 1.65;
+        }
+
+        @media(max-width:600px) {
+            .tl::before {
+                left: 14px;
+            }
+
+            .m,
+            .m:nth-child(even) {
+                width: 100%;
+                margin: 0;
+                padding: 0 0 50px 40px;
+                justify-content: flex-start;
+            }
+
+            .m::after,
+            .m:nth-child(even)::after {
+                left: 7px;
+                right: auto;
+            }
+        }
+
+        /* Lightbox Modal */
+        #lb {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 6, 26, 0.92);
+            z-index: 100;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        #lb.on {
+            display: grid;
+        }
+
+        #lb .box {
+            max-width: 480px;
+            text-align: center;
+        }
+
+        #lb img {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Envelope & Letter */
+        .env {
+            width: min(320px, 80vw);
+            height: 200px;
+            background: linear-gradient(135deg, var(--rose), #d66853);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 15px 40px rgba(244, 162, 97, 0.3);
+            display: grid;
+            place-items: center;
+            color: #1a0f2e;
+            font-size: 1.4rem;
+            transition: transform 0.3s;
+        }
+
+        .env:hover {
+            transform: scale(1.03);
+        }
+
+        .env::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom right, transparent 49%, rgba(0, 0, 0, 0.12) 50%) 0 0/50% 100% no-repeat,
+                linear-gradient(to bottom left, transparent 49%, rgba(0, 0, 0, 0.12) 50%) 100% 0/50% 100% no-repeat;
+            border-radius: 12px;
+        }
+
+        #letter {
+            display: none;
+            max-width: 580px;
+            text-align: left;
+            background: #fff8eb;
+            color: #2a1b38;
+            padding: 36px 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(244, 162, 97, 0.2);
+            font-size: 1.2rem;
+            line-height: 2;
+            white-space: pre-wrap;
+            border: 1px solid #f0d8b8;
+        }
+
+        /* Realistic Birthday Candle & Cake */
+        .cake-container {
+            position: relative;
+            margin: 30px auto 10px;
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .cake-body {
+            position: relative;
+            width: 200px;
+            height: 110px;
+            background: linear-gradient(to bottom, #e76f51, #b54930);
+            border-radius: 16px 16px 8px 8px;
+            box-shadow: inset 0 12px 0 #f4a261, 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .cake-body::before {
+            content: "";
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: #f4a261;
+            border-radius: 6px;
+        }
+
+        /* Realistic Candle */
+        .real-candle {
+            position: relative;
+            width: 14px;
+            height: 55px;
+            background: linear-gradient(to right, #fff, #f3e5f5, #e1bee7);
+            border-radius: 4px 4px 1px 1px;
+            margin-bottom: -2px;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Wick */
+        .wick {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 8px;
+            background: #444;
+        }
+
+        /* Realistic Flame */
+        .flame {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 26px;
+            background: radial-gradient(ellipse at 50% 80%, #ffffff 0%, #ffea00 25%, #ff6d00 60%, transparent 100%);
+            border-radius: 50% 50% 35% 35%;
+            filter: drop-shadow(0 0 12px #ff9100) drop-shadow(0 0 25px #ff3d00);
+            animation: flicker 0.15s infinite alternate ease-in-out, sway 1.8s infinite alternate ease-in-out;
+            transform-origin: center bottom;
+        }
+
+        @keyframes flicker {
+            0% {
+                transform: translateX(-50%) scale(1, 1);
+                opacity: 0.95;
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1.08, 0.92);
+                opacity: 1;
+            }
+        }
+
+        @keyframes sway {
+            0% {
+                transform: translateX(-50%) rotate(-3deg);
+            }
+
+            100% {
+                transform: translateX(-50%) rotate(4deg);
+            }
+        }
+
+        /* Extinguished Smoke effect */
+        .out .flame {
+            display: none;
+        }
+
+        .smoke-particle {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: rgba(200, 200, 200, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: rise 2.5s forwards ease-out;
+        }
+
+        @keyframes rise {
+            0% {
+                opacity: 0.8;
+                transform: translate(-50%, 0) scale(1);
+                filter: blur(2px);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-80%, -80px) scale(4);
+                filter: blur(8px);
+            }
+        }
+
+        .big {
+            font-size: clamp(2.3rem, 9vw, 4.8rem);
+            text-shadow: 0 0 40px var(--rose);
+        }
+
+        #fin {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .sig {
+            margin-top: 30px;
+            color: var(--dim);
+        }
+
+        #mus {
+            position: fixed;
+            top: max(14px, env(safe-area-inset-top));
+            right: 14px;
+            z-index: 60;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: var(--moon);
+            border-radius: 30px;
+            padding: 8px 18px;
+            cursor: pointer;
+            display: none;
+            backdrop-filter: blur(6px);
+            font-family: 'Mukta', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="sky"></canvas>
+    <canvas id="fx"></canvas>
+
+    <audio id="aud" src="music.mp3" loop preload="auto"></audio>
+    <button id="mus" aria-label="सङ्गीत">🎵 सङ्गीत</button>
+
+    <section id="gate" class="screen">
+        <p class="serif" style="font-size:1.4rem;color:var(--rose)">तिम्रो लागि, एउटा सानो आकाश…</p>
+        <h1 class="serif" style="margin-top:12px">केही क्षणमै<br>तिम्रो विशेष दिन सुरु हुँदैछ</h1>
+        <div class="cd" id="cd">
+            <div><b id="h">००</b><span>घण्टा</span></div>
+            <div><b id="mi">००</b><span>मिनेट</span></div>
+            <div><b id="s">००</b><span>सेकेन्ड</span></div>
+        </div>
+        <p class="sub" id="gmsg">रातिको १२ बज्नासाथ यो खुल्नेछ। तबसम्म यी ताराहरू गन्दै गर है 🌙</p>
+        <button class="go" id="open" style="display:none">सरप्राइज खोल्नुहोस् ✨</button>
+    </section>
+
+    <main id="story">
+        <section class="screen">
+            <p class="serif" style="font-size:1.4rem;color:var(--rose)">
+                तिमीलाई भेट्नुअघि पनि दिनहरू बित्थे,<br>
+                तर तिमी आएपछि केही दिनहरू सम्झना बन्न थाले।<br>
+                तिम्रो हाँसो, तिम्रा कुरा,<br>
+                अनि तिमीसँग बिताएका साना-साना पलहरू—<br>
+                यी सबै मेरा लागि अनमोल छन्। ❤️<br>
+
+            </p>
+            <h1 class="serif">आज तिम्रो जन्मदिनमा,<br>ती सम्झनाहरू फेरि एकपटक हेरौँ न।</h1>
+            <p class="sub">तल सार्दै(Scroll गर्दै) जाउँ है माया ................ 👇</p>
+        </section>
+
+        <section>
+            <div class="tl" id="tl"></div>
+        </section>
+
+        <section class="screen">
+            <p class="serif" style="font-size:1.6rem;margin-bottom:24px">तिम्रो लागि एउटा विशेष चिठी छ 💌</p>
+            <div class="env" id="env"><span class="serif">चिठी खोल्न यहाँ थिच</span></div>
+            <div id="letter"></div>
+        </section>
+
+        <section class="screen">
+            <p class="serif" style="font-size:1.5rem">मनमनै एउटा इच्छा माग, अनि यो बत्ती निभाऊ 🕯️</p>
+
+            <div class="cake-container" id="cake">
+                <div class="real-candle">
+                    <div class="wick"></div>
+                    <div class="flame"></div>
+                </div>
+                <div class="cake-body"></div>
+            </div>
+
+            <p class="sub" id="ck">(क्यान्डल वा केकमा थिचेर बत्ती निभाऊ 🎂)</p>
+
+            <div id="fin">
+                <h1 class="serif big">जन्मदिनको<br>धेरै धेरै माया र शुभकामना,<br>कल्पना! 🎂</h1>
+                <p class="sub" id="fm"></p>
+                <p class="sig serif" style="font-size:1.25rem">धेरै मायासहित — दिनेश केसी ❤️</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="lb">
+        <div class="box">
+            <div id="lbi"></div>
+            <h3 class="serif" id="lbt" style="font-size:1.7rem;margin-top:14px;font-weight:400"></h3>
+            <p id="lbx" style="color:var(--dim)"></p>
+            <p style="margin-top:14px;font-size:.85rem;color:var(--dim)">(बन्द गर्न कतै पनि थिच्नुहोस्)</p>
+        </div>
+    </div>
+
+    <script>
+        /* ============ यहाँ विवरण मिलाउनुहोस् ============ */
+        const HER = "कल्पना";
+        // २७ अक्टोबर २०२६, राति १२:००:०० बजे (महिना ९ = अक्टोबर)
+        const BIRTHDAY = new Date(2026, 9, 26, 11, 53, 0); 
+        const LOCK = true; 
+
+        const MEMORIES = [
+            { d: "हाम्रो सुरुवात", t: "पहिलो भेट", x: "त्यो दिन केही सोचेको थिइनँ, तर त्यही दिनदेखि मेरो जीवनको सुन्दर अध्याय सुरु भयो।" },
+            { d: "केही हप्तापछि", t: "पहिलो ‘हाइ’ देखि घण्टौंसम्म", x: "सामान्य कुराकानीबाट सुरु भएको हाम्रो सम्बन्ध कहिले घण्टौंसम्म कुरा गर्ने बानीमा बदलियो, थाहै भएन।" },
+            { d: "एक दिन", t: "त्यो मुस्कान", x: "तिम्रो मुस्कानमा अद्भूत जादु छ—त्यसले मेरो जुनसुकै खराब दिनलाई पनि उज्यालो बनाइदिन्छ।" },
+            { d: "एक साँझ", t: "सँगै घुमेको दिन", x: "ठाउँ जस्तोसुकै होस्, तिमी साथमा छौ भने हरेक यात्रा र क्षण खास बन्छ।" },
+            { d: "एउटा सम्झना", t: "रिसाउने र मनाउने", x: "साना-तिना रिस र झगडा त भइरहन्छन्, तर एकअर्काप्रतिको माया र बुझाइ झनै गहिरिँदै गयो।" },
+            { d: "एउटा चाडपर्व", t: "त्यो विशेष दिन", x: "जीवनका अवसरहरू धेरै आए, तर मेरो लागि सबैभन्दा ठूलो र अनमोल उपहार तिम्रो साथ नै हो।" },
+            { d: "एउटा फोटो", t: "रमाइलो सम्झना", x: "फोटो कस्तो आयो भन्ने महत्त्व थिएन, त्यो पलमा हामी कति खुसी थियौँ भन्ने कुरा मात्र याद छ।" },
+            { d: "एक रात", t: "अबेरसम्मका कुराकानी", x: "रात बित्दै जान्थ्यो, निद्राले बोलाउँथ्यो, तर तिमीसँग कुरा गरिरहन मन लागिरहन्थ्यो।" },
+            { d: "एक दिन", t: "तिम्रो सरप्राइज", x: "तिमीले साना-साना कुराबाट पनि मलाई कति खुसी दिन सकिन्छ भन्ने महसुस गरायौ।" },
+            { d: "एउटा यात्रा", t: "हाम्रो साहसिक यात्रा", x: "बाटो जतिसुकै कठिन भए पनि तिम्रो हात समातेर हिँड्दा हरेक पाइला सहज लाग्यो।" },
+            { d: "एक क्षण", t: "मौनताको बोली", x: "कहिलेकाहीँ केही नबोली चुपचाप साथमा हुनु नै संसारको सबैभन्दा ठूलो भरोसा हुन्थ्यो।" },
+            { d: "एक दिन", t: "तिम्रो सपना", x: "तिम्रा हरेक सपना पूरा भएको हेर्ने मेरो चाहना छ, र म सधैं तिम्रो साथमा हुनेछु।" },
+            { d: "एउटा सम्झना", t: "हाम्रा गोप्य कुरा", x: "अरू कसैले नबुझ्ने तर हामी दुवैलाई हँसाउने ती साना-तिना कुराहरू नै हाम्रो संसार हुन्।" },
+            { d: "आजसम्म", t: "आजसम्मको यात्रा", x: "समय बित्दै गयो, दिनहरू फेरिए, तर तिमीप्रतिको माया र आदर दिनप्रतिदिन बढ्दै गयो।" },
+            { d: "आज", t: "आज तिम्रो दिन", x: "आज तिम्रो जन्मदिन हो—मेरो जीवनलाई सुन्दर बनाउने मान्छेलाई जन्मदिनको शुभकामना!" }
+        ];
+
+        const LETTER = `मेरी प्यारी कल्पना, ❤️
+
+आज तिम्रो जन्मदिन...
+तिम्रो लागि केही विशेष गरूँ भन्ने सोचले मैले यो सानो डिजिटल आकाश बनाएको हुँ। यहाँ देखिने ताराहरू, यी शब्दहरू र यसको पछाडि लेखिएका कोडहरूभन्दा पनि खास कुरा एउटै छ—तिमीलाई खुसी बनाउने मेरो सानो प्रयास।
+
+सायद म सधैँ आफ्ना भावनाहरू शब्दमा व्यक्त गर्न सक्दिनँ होला। तर आज मनमा भएका केही कुरा तिमीलाई भन्न चाहन्छु।
+
+कल्पना, तिमी मेरो जीवनमा हुनु आफैँमा एउटा सुन्दर अनुभूति हो। तिम्रो मुस्कानले मन खुसी बनाउँछ, तिम्रो बोलीले दिनलाई मिठास दिन्छ, अनि तिम्रो सम्झनाले साधारण पलहरूलाई पनि विशेष बनाइदिन्छ। कहिलेकाहीँ तिमीलाई थाहा पनि नहुन सक्छ, तर तिम्रो एउटा सानो कुराले पनि मेरो मनमा कति ठूलो खुसी ल्याउँछ।
+
+म तिमीलाई सधैँ खुसी देख्न चाहन्छु। तिमीले देखेका सपना पूरा भएको हेर्ने चाहना छ। जीवनमा कहिल्यै अप्ठ्यारा दिन आए भने पनि आफूभित्रको शक्ति नबिर्सिनू। तिमीले सोचेभन्दा धेरै बलियो छौ, तिमीले महसुस गरेभन्दा धेरै मूल्यवान् छौ, र तिम्रो मुस्कान मेरो लागि यो संसारको एउटा सुन्दर कुरा हो।
+
+म तिम्रो जीवनका हरेक दिनलाई खुसीले भरिदिन सक्छु भनेर वाचा गर्न सक्दिनँ। तर तिम्रो खुसीमा मनदेखि रमाउन, तिम्रा दुःखहरू ध्यान दिएर सुन्न र गाह्रो समयमा तिम्रो साथमा उभिन भने सधैँ प्रयत्‍न गर्नेछु।
+
+आज तिम्रो जन्मदिनमा मेरो कामना यति मात्रै छ—तिम्रो आँखामा सपना कहिल्यै नमरोस्, ओठको मुस्कान कहिल्यै नहराओस्, अनि तिम्रो मनले चाहेको खुसी तिमीले अवश्य पाऊ।
+
+हाम्रो कथामा अझै कति सुन्दर पलहरू थपिन बाँकी छन्, कति सम्झनाहरू बनाउन बाँकी छन्। यो वर्षबाट हाम्रो नयाँ अध्याय पनि सुरु हुँदै छ। यो वेबसाइट एक दिन बन्द होला, स्क्रिनबाट यी ताराहरू हराउलान्, तर तिम्रो लागि मायाले तयार पारेको यो सानो प्रयासको अर्थ भने सधैँ विशेष रहोस् भन्‍न चाहन्छु।
+
+कल्पना, तिमी मेरो लागि कति खास छौ भन्ने कुरा केही वाक्यले पूरा भन्न सक्दैनन्। त्यसैले आज यी शब्दहरूमा मेरो मनको अलिकति माया राखिदिएको छु।
+
+जन्मदिनको धेरै धेरै शुभकामना, मेरी प्यारी कल्पना। ❤️
+तिम्रो जीवन सधैँ माया, शान्ति, खुसी र सुन्दर सम्भावनाहरूले भरियोस्।
+
+— तिमीलाई धेरै माया गर्ने,
+दिनेश केसी ❤️`;
+
+        const FINAL = "कल्पना, आजको दिन तिम्रो हो—मन खोलेर हाँस्नू, आफूलाई धेरै माया गर्नू र आफ्ना सपनाहरूमा विश्वास गरिरहनू। तिमी सधैँ खुसी रहनू। जन्मदिनको धेरै धेरै शुभकामना, मेरी प्यारी! ❤️✨ अर्को वर्ष मेरो बुढीको रूपमा wish गर्नेछु है त";
+
+        const $ = s => document.querySelector(s);
+        const dev = n => String(n).replace(/\d/g, d => '०१२३४५६७८९'[d]);
+
+        /* Canvas background with Warm Birthday Candle Glow Particles */
+        const sky = $('#sky'), cx = sky.getContext('2d');
+        let stars = [], particles = [];
+
+        function rs() {
+            sky.width = innerWidth;
+            sky.height = innerHeight;
+            stars = Array.from({ length: 100 }, () => ({
+                x: Math.random() * sky.width,
+                y: Math.random() * sky.height,
+                r: Math.random() * 1.5 + .2,
+                p: Math.random() * 6
+            }));
+            particles = Array.from({ length: 40 }, () => ({
+                x: Math.random() * sky.width,
+                y: Math.random() * sky.height,
+                r: Math.random() * 3 + 1,
+                vy: -(Math.random() * 0.4 + 0.1),
+                alpha: Math.random() * 0.5 + 0.2
+            }));
+        }
+        rs();
+        addEventListener('resize', rs);
+
+        (function draw(t) {
+            cx.clearRect(0, 0, sky.width, sky.height);
+
+            let grad = cx.createRadialGradient(sky.width / 2, sky.height * 0.3, 10, sky.width / 2, sky.height * 0.3, sky.width * 0.7);
+            grad.addColorStop(0, 'rgba(244, 162, 97, 0.15)');
+            grad.addColorStop(0.5, 'rgba(231, 111, 81, 0.05)');
+            grad.addColorStop(1, 'transparent');
+            cx.fillStyle = grad;
+            cx.fillRect(0, 0, sky.width, sky.height);
+
+            for (const s of stars) {
+                cx.globalAlpha = .3 + .7 * Math.abs(Math.sin(t / 1200 + s.p));
+                cx.fillStyle = '#fff3db';
+                cx.beginPath();
+                cx.arc(s.x, s.y, s.r, 0, 7);
+                cx.fill();
+            }
+
+            for (const p of particles) {
+                p.y += p.vy;
+                if (p.y < 0) p.y = sky.height;
+                cx.globalAlpha = p.alpha * (0.6 + 0.4 * Math.sin(t / 800 + p.x));
+                cx.fillStyle = '#f4a261';
+                cx.beginPath();
+                cx.arc(p.x, p.y, p.r, 0, 7);
+                cx.fill();
+            }
+
+            requestAnimationFrame(draw);
+        })(0);
+
+        const pal = [['#3a2f7a', '#b0707f'], ['#1f4b7a', '#7ab0b0'], ['#6a2f6a', '#eaa68c'], ['#2f5a4b', '#c9b46a'], ['#4a2f7a', '#7a9ae0']];
+        const emo = ['🌙', '💫', '🌸', '🌅', '💞', '🎁', '📸', '☕', '🌟', '⛰️', '🤍', '🌠', '😂', '🌹', '🎂'];
+
+        function dummy(i) {
+            const c = pal[i % 5];
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><rect width="400" height="500" fill="url(#g)"/><text x="200" y="240" font-size="100" text-anchor="middle">${emo[i % 15]}</text><text x="200" y="330" font-size="28" fill="#fff" fill-opacity=".9" text-anchor="middle" font-family="sans-serif">सम्झना ${dev(i + 1)}</text></svg>`;
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
+
+        const tl = $('#tl');
+        MEMORIES.forEach((m, i) => {
+            const e = document.createElement('div');
+            e.className = 'm';
+            e.innerHTML = `<div class="card"><div class="ph"><img alt="${m.t}"></div><div class="tx"><small>${m.d}</small><h3 class="serif">${m.t}</h3><p>${m.x}</p></div></div>`;
+            const img = e.querySelector('img');
+            img.onerror = () => { img.onerror = null; img.src = dummy(i); };
+            img.src = `photos/${i + 1}.jpg`;
+
+            e.querySelector('.card').onclick = () => {
+                $('#lbi').innerHTML = '';
+                const b = new Image();
+                b.src = img.src;
+                $('#lbi').appendChild(b);
+                $('#lbt').textContent = m.t;
+                $('#lbx').textContent = m.x;
+                $('#lb').classList.add('on');
+            };
+            tl.appendChild(e);
+        });
+
+        $('#lb').onclick = () => $('#lb').classList.remove('on');
+
+        const io = new IntersectionObserver(es => es.forEach(x => {
+            if (x.isIntersecting) x.target.classList.add('in');
+        }), { threshold: .15 });
+        document.querySelectorAll('.m').forEach(e => io.observe(e));
+
+        /* Corrected Countdown Logic */
+        const pad = n => dev(String(n).padStart(2, '0'));
+
+        function tick() {
+            const now = new Date().getTime();
+            const target = BIRTHDAY.getTime();
+            const diff = LOCK ? (target - now) : 0;
+
+            if (diff <= 0) {
+                $('#cd').style.display = 'none';
+                $('#gmsg').textContent = 'आखिर त्यो विशेष पल आयो… जन्मदिनको धेरै शुभकामना, ' + HER + '! 🎉';
+                $('#open').style.display = 'inline-block';
+                return;
+            }
+
+            const totalSecs = Math.floor(diff / 1000);
+            const hours = Math.floor(totalSecs / 3600);
+            const minutes = Math.floor((totalSecs % 3600) / 60);
+            const seconds = totalSecs % 60;
+
+            $('#h').textContent = pad(hours);
+            $('#mi').textContent = pad(minutes);
+            $('#s').textContent = pad(seconds);
+        }
+        tick();
+        setInterval(tick, 1000);
+
+        /* Audio Music Controls */
+        const aud = $('#aud'), mus = $('#mus');
+        mus.onclick = () => { aud.paused ? aud.play() : aud.pause(); };
+        aud.onplay = () => mus.textContent = '🎵 रोक्नुहोस्';
+        aud.onpause = () => mus.textContent = '🎵 बजाउनुहोस्';
+
+        $('#open').onclick = () => {
+            $('#gate').style.display = 'none';
+            $('#story').style.display = 'block';
+            mus.style.display = 'block';
+            aud.play().catch(() => { });
+            scrollTo(0, 0);
+            boom(1);
+        };
+
+        /* Letter click */
+        let typed = false;
+        $('#env').onclick = () => {
+            $('#env').style.display = 'none';
+            const L = $('#letter');
+            L.style.display = 'block';
+
+            aud.play().catch(() => { });
+
+            if (typed) return;
+            typed = true;
+
+            let i = 0;
+            (function typeNextChar() {
+                L.textContent = LETTER.slice(0, ++i);
+                if (i < LETTER.length) {
+                    setTimeout(typeNextChar, 75);
+                }
+            })();
+        };
+
+        /* Confetti Effect */
+        const fx = $('#fx'), f = fx.getContext('2d');
+        let ps = [];
+        function sz() { fx.width = innerWidth; fx.height = innerHeight; }
+        sz();
+        addEventListener('resize', sz);
+
+        function boom(n) {
+            const c = ['#f4a261', '#e76f51', '#fff3db', '#b185db', '#ff7aa8'];
+            for (let i = 0; i < 110 * n; i++) {
+                ps.push({
+                    x: innerWidth / 2,
+                    y: innerHeight * .45,
+                    vx: (Math.random() - .5) * 14,
+                    vy: -Math.random() * 12 - 3,
+                    c: c[i % 5],
+                    r: Math.random() * 5 + 2,
+                    a: 1
+                });
+            }
+        }
+
+        (function loop() {
+            f.clearRect(0, 0, fx.width, fx.height);
+            ps = ps.filter(p => p.a > 0);
+            for (const p of ps) {
+                p.vy += .22;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.a -= .006;
+                f.globalAlpha = Math.max(p.a, 0);
+                f.fillStyle = p.c;
+                f.fillRect(p.x, p.y, p.r, p.r * 1.6);
+            }
+            requestAnimationFrame(loop);
+        })();
+
+        /* Realistic Candle Blow-out Event */
+        $('#cake').onclick = () => {
+            const c = $('#cake');
+            if (c.classList.contains('out')) return;
+            c.classList.add('out');
+
+            const candleEl = $('.real-candle');
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const smoke = document.createElement('div');
+                    smoke.className = 'smoke-particle';
+                    candleEl.appendChild(smoke);
+                    setTimeout(() => smoke.remove(), 2500);
+                }, i * 180);
+            }
+
+            $('#ck').style.display = 'none';
+            $('#fin').style.display = 'block';
+            $('#fm').textContent = FINAL;
+
+            boom(3);
+            setTimeout(() => boom(2), 700);
+            setTimeout(() => boom(2), 1400);
+
+            $('#fin').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+    </script>
+</body>
+
+</html>
